@@ -15,6 +15,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.cpen321application.ui.ConnectionScreen
+import com.example.cpen321application.ui.MainScreen
+import com.example.cpen321application.ui.PictureScreen
+import com.example.cpen321application.ui.SurpriseScreen
 import com.example.cpen321application.ui.theme.CPEN321ApplicationTheme
 import java.net.HttpURLConnection
 import java.net.URL
@@ -27,11 +34,30 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CPEN321ApplicationTheme {
+
+                val navController = rememberNavController()
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        apiBaseUrl = BuildConfig.API_BASE_URL,
+
+                    NavHost(
+                        navController = navController,
+                        startDestination = "main_screen",
                         modifier = Modifier.padding(innerPadding)
-                    )
+                    ) {
+                        composable("main_screen") {
+                            MainScreen(navController = navController)
+                        }
+                        composable ("connection_screen") {
+                            ConnectionScreen()
+                        }
+                        composable("picture_screen") {
+                            PictureScreen()
+                        }
+                        composable("surprise_screen") {
+                            SurpriseScreen()
+                        }
+                    }
+                    MainScreen(navController = navController)
                 }
             }
         }
