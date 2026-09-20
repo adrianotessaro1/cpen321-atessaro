@@ -13,7 +13,7 @@ export function createApp(): Express {
   });
 
   app.get('/api/name', (_req, res) => {
-    res.json({ name: 'Adriano, Tessaro' });
+    res.json({ firstName: 'Adriano', lastName: 'Tessaro' });
   });
 
   app.get('/api/server-ip', (_req, res) => {
