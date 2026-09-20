@@ -1,7 +1,5 @@
 package com.example.cpen321application.ui
 
-import android.credentials.CredentialManager
-import android.widget.Space
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -14,13 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.cpen321application.R
-
 
 @Composable
 fun MainScreen(modifier: Modifier = Modifier, navController: NavController) {
@@ -29,15 +25,14 @@ fun MainScreen(modifier: Modifier = Modifier, navController: NavController) {
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Column (
+        Column(
             modifier = modifier.fillMaxSize().padding(12.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             // First Button
-            Button (
-                onClick = {navController.navigate("connection_screen")},
+            Button(
+                onClick = { navController.navigate("connection_screen") },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(8.dp),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
@@ -62,13 +57,12 @@ fun MainScreen(modifier: Modifier = Modifier, navController: NavController) {
                         fontWeight = FontWeight.SemiBold
                     )
                 }
-
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // Second Button
-            Button (
+            Button(
                 onClick = { navController.navigate("picture_screen") },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(8.dp),
@@ -84,7 +78,7 @@ fun MainScreen(modifier: Modifier = Modifier, navController: NavController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             // Third Button
-            Button (
+            Button(
                 onClick = { navController.navigate("surprise_screen") },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(8.dp),
@@ -98,5 +92,4 @@ fun MainScreen(modifier: Modifier = Modifier, navController: NavController) {
             }
         }
     }
-
 }
