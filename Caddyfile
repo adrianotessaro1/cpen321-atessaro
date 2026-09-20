@@ -1,0 +1,6 @@
+# 34-182-50-132.sslip.io : site address that this block will answer for
+# reverse_proxy : 
+# backend:3000 : where requests get forwarded to
+34-182-50-132.sslip.io {
+    reverse_proxy backend:3000
+}

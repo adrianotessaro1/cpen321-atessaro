@@ -10,6 +10,13 @@ if (Number.isNaN(port) || port < 1 || port > 65535) {
   throw new Error(`Invalid PORT: ${rawPort}`);
 }
 
+const rawServerPublicIp = process.env.SERVER_PUBLIC_IP;
+const serverPublicIp =
+  rawServerPublicIp === undefined || rawServerPublicIp === ''
+    ? '127.0.0.1'
+    : rawServerPublicIp;
+
 export const env = {
   port,
+  serverPublicIp,
 } as const;
