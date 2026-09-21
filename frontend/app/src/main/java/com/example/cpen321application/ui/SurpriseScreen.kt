@@ -225,7 +225,7 @@ fun SurpriseScreen(modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Text(
-                    text = "Good News to Improve Your Day !!",
+                    text = "Good News to Boost Your Day !!",
                     style = MaterialTheme.typography.headlineMedium,
                     textAlign = TextAlign.Center
                 )
