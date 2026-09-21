@@ -42,13 +42,11 @@ import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialException
 import com.example.cpen321application.BuildConfig
 import com.example.cpen321application.R
+import com.example.cpen321application.data.requestData
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
-import org.json.JSONObject
 import java.time.OffsetDateTime
 import java.util.Locale
 
@@ -62,9 +60,13 @@ private const val SERVER_TIME_ROUTE = "/api/server-time"
 @Composable
 fun ConnectionScreen(modifier: Modifier = Modifier) {
 
+    // Get the current context (used to access the Android API) 
     val context = LocalContext.current
+
+    // Create a coroutine scope to handle asynchronous operations and background tasks (separate from the main thread)
     val coroutineScope = rememberCoroutineScope()
 
+    // Status of the authentication process and user information
     var authStatus by remember { mutableStateOf("Not signed in yet") }
 
     var googleName by remember { mutableStateOf(NOT_LOADED) }
@@ -78,20 +80,28 @@ fun ConnectionScreen(modifier: Modifier = Modifier) {
     val httpClient = remember { OkHttpClient() }
 
     val onSignInClick: () -> Unit = {
+        // Launch a coroutine to handle the asynchronous authentication process so the UI thread is not blocked
         coroutineScope.launch {
             try {
+                // Create a credential manager to handle the authentication process
                 val credentialManager = CredentialManager.create(context)
 
                 val googleIdOption = GetGoogleIdOption.Builder()
-                    .setServerClientId(serverClientId = BuildConfig.GOOGLE_CLIENT_ID)
+                    // do not filter by authorized accounts that have previously used the app
                     .setFilterByAuthorizedAccounts(false)
+                    // Web Client ID on Oauth in the Google Cloud Project
+                    .setServerClientId(serverClientId = BuildConfig.GOOGLE_CLIENT_ID)
+                    // No need for nonce in this case since we are not performing any server side validation
                     .setNonce(nonce = null)
                     .build()
 
+                // Create a request to get the Google ID token
                 val request = GetCredentialRequest.Builder()
                     .addCredentialOption(googleIdOption)
                     .build()
 
+
+                // Get the Google ID token from the credential manager
                 val result = credentialManager.getCredential(
                     context = context,
                     request = request
@@ -102,29 +112,32 @@ fun ConnectionScreen(modifier: Modifier = Modifier) {
                     Log.d("GoogleSignIn", status)
                 }
 
+                // Extract the Google account information from the result
                 val googleAccountInfo = extractGoogleUser(result)
 
                 if (googleAccountInfo != null) {
                     googleName = "${googleAccountInfo.givenName} ${googleAccountInfo.familyName}"
 
+                    // Get the current time and format it 
                     val now = OffsetDateTime.now()
                     val formatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss 'GMT'xxx", Locale.CANADA)
                     clientTime = now.format(formatter)
 
                     try {
-                        val backendNameRaw = requestData(httpClient, BACKEND_NAME_ROUTE)
+                        // Get the backend name from the backend
+                        val backendNameRaw = requestData(httpClient, BuildConfig.API_BASE_URL + BACKEND_NAME_ROUTE)
                         backendName = backendNameRaw.getString("firstName") + " " + backendNameRaw.getString("lastName")
 
-                        // 2. Fetch Server IP
-                        val serverIpRaw = requestData(httpClient, SERVER_IP_ROUTE)
+                        // Get the server IP from the backend
+                        val serverIpRaw = requestData(httpClient, BuildConfig.API_BASE_URL + SERVER_IP_ROUTE)
                         serverIp = serverIpRaw.getString("ip")
 
-                        // 3. Fetch Client IP
-                        val clientIpRaw = requestData(httpClient, CLIENT_IP_ROUTE)
+                        // Get the client IP from the backend
+                        val clientIpRaw = requestData(httpClient, BuildConfig.API_BASE_URL + CLIENT_IP_ROUTE)
                         clientIp = clientIpRaw.getString("ip")
 
-                        // 4. Fetch Server Time
-                        val serverTimeRaw = requestData(httpClient, SERVER_TIME_ROUTE)
+                        // Get the server time from the backend
+                        val serverTimeRaw = requestData(httpClient, BuildConfig.API_BASE_URL + SERVER_TIME_ROUTE)
                         serverTime = serverTimeRaw.getString("time")
                     } catch (err: Exception) {
                         Log.e("GoogleSignIn", "Error fetching data connection information: , ${err.message}")
@@ -202,15 +215,15 @@ fun ConnectionScreen(modifier: Modifier = Modifier) {
             InfoRow(label = "Client IP", value = clientIp)
             InfoRow(label = "Server local time", value = serverTime)
             InfoRow(label = "Client local time", value = clientTime)
-            InfoRow(label = "Name (back end)", value = backendName)
+            InfoRow(label = "Name (backend)", value = backendName)
             InfoRow(label = "Name (Google account)", value = googleName)
         }
     }
 }
 
 /**
- * One labelled field. Label on the left, value on the right, so the six rows line up
- * into a readable column — M1 deducts marks for a messy screen.
+ * One labelled field. Lable on the left and value on the right.
+ * 
  */
 @Composable
 private fun InfoRow(label: String, value: String, modifier: Modifier = Modifier) {
@@ -221,6 +234,7 @@ private fun InfoRow(label: String, value: String, modifier: Modifier = Modifier)
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Top
     ) {
+        // Label on the left
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
@@ -229,6 +243,7 @@ private fun InfoRow(label: String, value: String, modifier: Modifier = Modifier)
 
         Spacer(modifier = Modifier.width(16.dp))
 
+        // Value on the right
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
@@ -239,8 +254,7 @@ private fun InfoRow(label: String, value: String, modifier: Modifier = Modifier)
 }
 
 /**
- * Same styling as the first button on MainScreen. If you want to stop maintaining two
- * copies, move this into its own file and have MainScreen call it too.
+ * Google Sign In Button with Google logo
  */
 @Composable
 private fun GoogleSignInButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
@@ -275,7 +289,14 @@ private fun GoogleSignInButton(onClick: () -> Unit, modifier: Modifier = Modifie
     }
 }
 
+/**
+ * This function handles the result of the Google sign in process and updates the status of the authentication process
+ * 
+ * @param result The result of the Google sign in process
+ * @param onStatusUpdate A function to update the status of the authentication process
+ */
 private fun handleSignInResult(result: GetCredentialResponse, onStatusUpdate: (String) -> Unit) {
+    // Check the type of the credential
     when (val credential = result.credential) {
         is CustomCredential -> {
             if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
@@ -308,24 +329,3 @@ private fun extractGoogleUser(result: GetCredentialResponse): GoogleIdTokenCrede
     }.getOrNull()
 }
 
-private suspend fun requestData(client: OkHttpClient, route: String): JSONObject {
-
-    val fullUrl = BuildConfig.API_BASE_URL + route
-
-    // withContext means: change to the IO pool ,execute this block, wait here until finished and then
-    // return to the thread I was in before
-    return withContext(Dispatchers.IO) {
-        val request = okhttp3.Request.Builder().url(fullUrl).build()
-
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw Exception("Unexpected code $response")
-
-            val responseData = response.body?.string()
-
-            if (responseData == null) {throw Exception("No response data")}
-
-            // No "return" keyword because we are inside a lambda function
-            JSONObject(responseData)
-        }
-    }
-}
