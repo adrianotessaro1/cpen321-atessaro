@@ -2,9 +2,12 @@
 sdk.dir=/path/to/Android/sdk
 
 # Backend base URL baked into the APK at build time.
-API_BASE_URL=http://10.0.2.2:3000
+# The deployed server is already running and stays up until grades are posted.
+# For a locally run backend instead, use http://10.0.2.2:3000 (the host, as seen from the emulator).
+API_BASE_URL=https://34-182-50-132.sslip.io
 
-# Google OAuth client ID.
-GOOGLE_CLIENT_ID=
+# Google OAuth client ID - the Web application client, not the Android one.
+# Required: sign-in fails without it.
+GOOGLE_CLIENT_ID=507043675190-ghcqcn9gapkg8jvk076c1kuanda5h31c.apps.googleusercontent.com
 
 # Other API keys, secrets, and configurations

@@ -1,6 +1,6 @@
-# CPEN321_26W1_ProjectName
+# CPEN 321 — M1 App Skeleton
 
-_Keep this README up to date with the steps required to build and run the frontend and backend (including any scripts, config files, and environment variables). TAs ill follow these instructions._
+_Keep this README up to date with the steps required to build and run the frontend and backend (including any scripts, config files, and environment variables). TAs will follow these instructions._
 
 ## Requirements
 
@@ -33,18 +33,32 @@ Install the following before the frontend or backend setup steps:
    ```
    Set at least:
    - `sdk.dir`: path to your Android SDK. Android Studio usually writes this the first time you open `frontend/`. On Mac it is often `sdk.dir=/Users/<username>/Library/Android/sdk`.
-   - `API_BASE_URL`: backend URL baked into the APK. Use `http://10.0.2.2:3000` for the emulator (`10.0.2.2` is the host machine). For a physical device on the same Wi-Fi, use `http://<your-lan-ip>:3000`.
+   - `API_BASE_URL`: backend URL baked into the APK. Leave it as the deployed server:
+     `https://34-182-50-132.sslip.io`. That server is already running and stays up until
+     grades are posted, so **you do not need to run the backend yourself** to exercise the app.
+     Only if you want to run it locally, use `http://10.0.2.2:3000` for the emulator
+     (`10.0.2.2` is the host machine as seen from the emulator).
+   - `GOOGLE_CLIENT_ID`: required — Google sign-in fails without it. Use the **Web application**
+     OAuth client ID: `507043675190-ghcqcn9gapkg8jvk076c1kuanda5h31c.apps.googleusercontent.com`
 
 
 ### Build and Run
 
 - **Debug build**: Click the green play button in the toolbar, to compile the code, package a debug APK, and install it on the connected device or running emulator. Alternatively, from the project root, run `./scripts/run-frontend.sh`.
-- **Release build**: Go to Build -> Generate Signed App Bundle or APK -> APK. Follow the on-screen instructions to create a key, and select the "release" build variant. You will then have to manually install the generated APK on your device or the running emulator.
+- **Release build**: from the project root, run `cd frontend && ./gradlew assembleRelease`. The
+  APK is written to `frontend/app/build/outputs/apk/release/app-release.apk` and is signed
+  automatically with the local debug keystore (`~/.android/debug.keystore`).
+  **Do not generate a new signing key.** The Android OAuth client is registered against one
+  certificate SHA-1, so an APK signed with any other key compiles and installs but fails
+  Google sign-in with `DEVELOPER_ERROR`. For the same reason, an APK you rebuild here will not
+  sign in — only the submitted APK carries the registered key.
 
 
 ### Backend Configuration
 
-Ensure the backend server is running and update the base URL in the app configuration if needed.
+The backend is already deployed at `https://34-182-50-132.sslip.io` (HTTPS via Caddy) and stays
+up until grades are posted, so no backend setup is needed just to run the app. The sections below
+are only for building and running it yourself.
 
 ---
 ## Backend Setup
@@ -123,4 +137,22 @@ Set at least:
 
 ## Additional Setup
 
-_Please specify any other additional setup steps non-specific to either frontend nor backend_
+### Google sign-in (needed for Button 1)
+
+The OAuth consent screen is in **Testing** mode, so only accounts on the test-user list can sign
+in. Add the provided test account to the emulator before tapping Button 1:
+
+**Settings → Passwords & accounts → Add account → Google**
+
+The account and its password are in `M1_Doc.pdf`, submitted with this milestone — they are
+deliberately not stored in this repository.
+
+### Emulator networking
+
+If sign-in reports "No credentials available" and Button 3 reports "Unable to resolve host", the
+emulator's DNS resolver has gone stale — this happens after the host machine changes network or a
+VPN toggles. Relaunch the emulator with an explicit resolver; no code change is involved:
+
+```bash
+emulator -avd <your-avd> -dns-server 8.8.8.8 -no-snapshot-load
+```
