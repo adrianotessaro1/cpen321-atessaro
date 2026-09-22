@@ -6,10 +6,18 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cpen321application.ui.ConnectionScreen
 import com.example.cpen321application.ui.MainScreen
@@ -17,7 +25,10 @@ import com.example.cpen321application.ui.PictureScreen
 import com.example.cpen321application.ui.SurpriseScreen
 import com.example.cpen321application.ui.theme.CPEN321ApplicationTheme
 
+private const val MAIN_ROUTE = "main_screen"
+
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -27,15 +38,36 @@ class MainActivity : ComponentActivity() {
                 // Instance of the navigation controller to move between screens
                 val navController = rememberNavController()
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                // Which screen is showing right now.
+                val currentEntry by navController.currentBackStackEntryAsState()
+                val showBack = currentEntry?.destination?.route != MAIN_ROUTE
+
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    topBar = {
+                        if (showBack) {
+                            TopAppBar(
+                                title = {},
+                                navigationIcon = {
+                                    IconButton(onClick = { navController.popBackStack() }) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = "Back"
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                    }
+                ) { innerPadding ->
                     // NavHost is the main container for the navigation
                     NavHost(
                         navController = navController,
-                        startDestination = "main_screen",
+                        startDestination = MAIN_ROUTE,
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         // Main screen
-                        composable("main_screen") {
+                        composable(MAIN_ROUTE) {
                             MainScreen(navController = navController)
                         }
                         // Connection screen

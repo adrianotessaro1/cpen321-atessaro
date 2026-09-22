@@ -46,6 +46,30 @@ import org.json.JSONArray
 private const val GOOD_NEWS_URL =
     "https://www.goodnewsnetwork.org/wp-json/wp/v2/posts?per_page=5&_fields=title,link,date"
 
+// Shown when the Good News Network API cannot be reached. 
+private val FALLBACK_HEADLINES = listOf(
+    Headline(
+        "New AI Model Can Detect Heart Disease Markers in Simple Electrocardiogram Readings\u2013a Breakthrough",
+        "https://www.goodnewsnetwork.org/new-ai-model-can-detect-heart-disease-markers-in-simple-electrocardiogram-readings-a-breakthrough/"
+    ),
+    Headline(
+        "Rural French Mayors Rally to Save Their Local Cafe-Bistro, and Help Reverse National Trend",
+        "https://www.goodnewsnetwork.org/rural-french-mayors-rally-to-save-their-local-cafe-bistro-and-help-reverse-national-trend/"
+    ),
+    Headline(
+        "Korean Drone Rescue Program Helps Mozambique Achieve Zero Fatalities During Worst Flood in Decades",
+        "https://www.goodnewsnetwork.org/korean-drone-rescue-program-helps-mozambique-achieve-zero-fatalities-during-worst-flood-in-decades/"
+    ),
+    Headline(
+        "Historic Philanthropic Gift Will Expand Veterinary Care Access to Millions of Americans and Their Pets",
+        "https://www.goodnewsnetwork.org/historic-philanthropic-gift-will-expand-veterinary-care-access-to-millions-of-americans-and-their-pets/"
+    ),
+    Headline(
+        "\u201cEducation is the key to unlock the golden door of freedom.\u201d \u2013 George Washington Carver",
+        "https://www.goodnewsnetwork.org/george-washington-carver-quote-about-education/"
+    )
+)
+
 @Composable
 fun SurpriseScreen(modifier: Modifier = Modifier) {
 
@@ -104,7 +128,10 @@ fun SurpriseScreen(modifier: Modifier = Modifier) {
 
             newsStatus = ""
         } catch (err: Exception) {
-            newsStatus = "Error loading news: ${err.message}"
+            // The feed is a third-party host; if it is unreachable, fall back to the saved
+            // copies rather than leaving the section empty.
+            headlines.addAll(FALLBACK_HEADLINES)
+            newsStatus = "Could not reach the news service, showing saved headlines. (${err.message})"
         }
 
         isRunning = false
